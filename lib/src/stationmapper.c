@@ -47,7 +47,7 @@ ssize_t load_map(const char* image_filename, const char* config_filename, peace_
     if(4 == count) {
         fprintf(stderr, "%s:%d\n", 
            __FILE__, __LINE__);
-        return -1;
+        //return -1;
     }
     fclose(fp);
 
@@ -91,7 +91,7 @@ void draw_point_by_lat_lon(peace_of_map_t * map, float lat, float lon, int r, in
             if ((x + i < 0) || (x + i >= map->width) || (y + j < 0) || (y + j > map->height)) {
                 continue;
             }
-            add_pixel(map->image, map->width, x + i, y + j, r, g, b, 32);
+            draw_pixel(map->image, map->width, x + i, y + j, r, g, b, 32);
         }
     }
 }

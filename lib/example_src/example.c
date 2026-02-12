@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
     }
 
     // Get user's location
-    float user_lat = 55.6;
-    float user_lon = 37.2;
+    float user_lat = 55.66323099;
+    float user_lon = 37.244983000000005;
     // printf("Enter your latitude (example: 55.655)\n");
     // scanf("%f", &user_lat);
     // printf("Enter your longitude (example: 37.252)\n");
@@ -54,17 +54,17 @@ int main(int argc, char *argv[])
 
     // Draw all stations
     for (int i = 0; i < stations.num_stations; i++) {
-        draw_point_by_lat_lon(&map, stations.stations[i].lat, stations.stations[i].lon, 255, 0, 0);
+        draw_point_by_lat_lon(&map, stations.stations[i].lat, stations.stations[i].lon, 0, 0, 255);
     }
 
     // Nearest station search
     station_t nearest_station = get_nearest_station(&stations, user_lat, user_lon);
-    draw_point_by_lat_lon(&map, nearest_station.lat, nearest_station.lon, 255, 200, 0);
+    draw_point_by_lat_lon(&map, nearest_station.lat, nearest_station.lon, 255, 0, 0);
     printf("The nearest station: %s (lat: %4f, lon: %.4f)\n", nearest_station.name, nearest_station.lat, nearest_station.lon);
     printf("Distance to the station: %.2f km\n", get_distance_in_km(nearest_station.lat, nearest_station.lon, user_lat, user_lon));
 
     // Generate output map image
-    const char output_map_name[] = "map_out.bmp";
+    const char output_map_name[] = "build/map_out.bmp";
     int err = save_map(&map, output_map_name);
 	if (err)
 		printf("Failed to save %s, error code: %u\n", output_map_name, err);

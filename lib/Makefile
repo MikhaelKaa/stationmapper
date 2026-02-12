@@ -1,6 +1,7 @@
 # ====== Настройки компиляции ======
 CC       = gcc
-CFLAGS   = -fPIC -Wall -Wextra -O2 -MMD -MP
+# CFLAGS   = -fPIC -Wall -Wextra -O2 -MMD -MP
+CFLAGS   = -fPIC -Wall -Wextra -g -O0 -MMD -MP
 LDFLAGS  = -L$(BUILD_DIR)
 LDLIBS   = -lstationmapper -lm
 

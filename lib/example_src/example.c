@@ -1,7 +1,8 @@
-#include "stdio.h"
-#include "string.h"
-#include "math.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+#include <errno.h>
 
 #include "../include/stationmapper.h"
 
@@ -21,20 +22,28 @@ int main(int argc, char *argv[])
     version_t version = get_library_version();
     printf("Using stationmapper %d.%d.%d\n", version.major, version.minor, version.patch);
 
+    if(3 == argc) {
+        printf("EINVAL\r\n");
+        return -EINVAL;
+    }
+
     // Load map and stations list
     peace_of_map_t map;
-    if(load_map(argv[0], argv[1], &map)) {
+    printf("try load bmp %s\n", argv[1]);
+    if(load_map(argv[1], argv[2], &map)) {
         printf("load_map error\r\n");
+        return -EINVAL;
     }
 
     stations_list_t stations;
-    if(load_stations(argv[2], &stations)) {
+    if(load_stations(argv[3], &stations)) {
         printf("load_stations error\r\n");
+        return -EINVAL;
     }
 
     // Get user's location
-    float user_lat = 55.655;
-    float user_lon = 37.252;
+    float user_lat = 55.6;
+    float user_lon = 37.2;
     // printf("Enter your latitude (example: 55.655)\n");
     // scanf("%f", &user_lat);
     // printf("Enter your longitude (example: 37.252)\n");

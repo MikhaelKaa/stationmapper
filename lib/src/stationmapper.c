@@ -45,6 +45,8 @@ ssize_t load_map(const char* image_filename, const char* config_filename, peace_
 
     int count = fscanf(fp, "%f, %f, %f, %f\n", &map->top_left_lat, &map->top_left_lon, &map->bottom_right_lat, &map->bottom_right_lon);
     if(4 == count) {
+        fprintf(stderr, "%s:%d\n", 
+           __FILE__, __LINE__);
         return -1;
     }
     fclose(fp);

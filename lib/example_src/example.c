@@ -22,8 +22,15 @@ int main(int argc, char *argv[])
     printf("Using stationmapper %d.%d.%d\n", version.major, version.minor, version.patch);
 
     // Load map and stations list
-    peace_of_map_t map = load_map(argv[0], argv[1]);
-    stations_list_t stations = load_stations(argv[2]);
+    peace_of_map_t map;
+    if(load_map(argv[0], argv[1], &map)) {
+        printf("load_map error\r\n");
+    }
+
+    stations_list_t stations;
+    if(load_stations(argv[2], &stations)) {
+        printf("load_stations error\r\n");
+    }
 
     // Get user's location
     float user_lat = 55.655;
@@ -57,4 +64,6 @@ int main(int argc, char *argv[])
 
     // Cleanup
     free(map.image);
+    
+    return 0;
 }

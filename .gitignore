@@ -1,0 +1,4 @@
+lib/build/example
+lib/build/libstationmapper.so
+lib/build/stationmapper.o
+lib/map_out.bmp

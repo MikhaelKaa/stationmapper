@@ -48,12 +48,12 @@ typedef struct {
 /* ===================  Functions  ================================== */
 
 // Return current library version.
-const version_t get_library_version(void);
+version_t get_library_version(void);
 
 
 // Load map image (BMP) linked to the geographical coordinates.
 // Linkage information is loaded from config file.
-peace_of_map_t load_map(const char *image_filename, const char *config_filename);
+ssize_t load_map(const char *image_filename, const char *config_filename, peace_of_map_t * map);
 
 
 // Save map as bmp image.
@@ -61,7 +61,7 @@ int save_map(const peace_of_map_t *map, const char *output_filename);
 
 
 // Load stations list from csv file.
-stations_list_t load_stations(const char *stations_list_filename);
+ssize_t load_stations(const char * stations_list_filename, stations_list_t * stations_list);
 
 
 // Calculate distance in km between to geographical points

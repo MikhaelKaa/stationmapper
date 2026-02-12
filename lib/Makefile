@@ -44,7 +44,8 @@ $(EXAMPLE_BIN): $(EXAMPLE_SRC) $(LIB_SO) | $(BUILD_DIR)
 # ====== Очистка ======
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -rf *.bmp
 
 # ====== Запуск примера (после сборки) ======
 run: $(EXAMPLE_BIN)
-	./$(EXAMPLE_BIN) ./data/map_1.bmp ./data/map_1.csv ./data/stations_1.csv
+	./$(EXAMPLE_BIN) ./data/map_1.bmp  ./data/stations_1.csv ./data/map_1.csv

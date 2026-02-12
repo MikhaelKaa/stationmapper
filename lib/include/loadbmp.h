@@ -108,7 +108,7 @@ LOADBMP_API unsigned int loadbmp_decode_file(
 	unsigned int w, h;
 	unsigned char *data = NULL;
 
-	unsigned int x, y, i, padding;
+	unsigned int x, i, padding;
 
 	memset(bmp_file_header, 0, sizeof(bmp_file_header));
 	memset(bmp_info_header, 0, sizeof(bmp_info_header));
@@ -150,7 +150,7 @@ LOADBMP_API unsigned int loadbmp_decode_file(
 			return LOADBMP_OUT_OF_MEMORY;
 		}
 
-		for (y = (h - 1); y != -1; y--)
+		for (int y = h - 1; y >= 0; y--)
 		{
 			for (x = 0; x < w; x++)
 			{
@@ -164,7 +164,12 @@ LOADBMP_API unsigned int loadbmp_decode_file(
 					return LOADBMP_INVALID_FILE_FORMAT;
 				}
 
-				data[i] ^= data[i + 2] ^= data[i] ^= data[i + 2]; // BGR -> RGB
+				// BGR -> RGB
+				//data[i] ^= data[i + 2] ^= data[i] ^= data[i + 2]; 
+				data[i] ^= data[i + 2];
+				data[i + 2] ^= data[i];
+				data[i] ^= data[i + 2];
+
 
 				if (components == LOADBMP_RGBA)
 					data[i + 3] = 255;
@@ -237,7 +242,7 @@ LOADBMP_API unsigned int loadbmp_encode_file(
 		return LOADBMP_FILE_OPERATION;
 	}
 
-	for (y = (height - 1); y != -1; y--)
+	for (y = (height - 1); y-- > 0; )
 	{
 		for (x = 0; x < width; x++)
 		{
@@ -245,8 +250,11 @@ LOADBMP_API unsigned int loadbmp_encode_file(
 
 			memcpy(pixel, imageData + i, sizeof(pixel));
 
-			pixel[0] ^= pixel[2] ^= pixel[0] ^= pixel[2]; // RGB -> BGR
-
+			// RGB -> BGR
+			pixel[0] ^= pixel[2];
+			pixel[2] ^= pixel[0];
+			pixel[0] ^= pixel[2];
+			
 			if (fwrite(pixel, sizeof(pixel), 1, f) == 0)
 			{
 				fclose(f);

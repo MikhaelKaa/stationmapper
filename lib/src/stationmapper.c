@@ -1,7 +1,9 @@
-#include "stdio.h"
-#include "string.h"
-#include "math.h"
-#include "unistd.h"
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <unistd.h>
+#include <errno.h>
+
 
 #include "../include/stationmapper.h"
 
@@ -12,35 +14,42 @@
 #define LIB_VERSION_MINOR 0
 #define LIB_VERSION_PATCH 2
 
-const version_t get_library_version(void) {
+version_t get_library_version(void) {
     const version_t version = {.major = LIB_VERSION_MAJOR, .minor = LIB_VERSION_MINOR, .patch = LIB_VERSION_PATCH};
     return version;
 }
 
-peace_of_map_t load_map(const char* image_filename, const char* config_filename) {
-    peace_of_map_t map;
+ssize_t load_map(const char* image_filename, const char* config_filename, peace_of_map_t * map) {
+    if(!map) return -EINVAL;
 
     if(access(image_filename, F_OK) != 0) {
         printf("Failed to load map image file %s\n", image_filename);
-        return map;
+        return -1;
     }
 
     if(access(config_filename, F_OK) != 0) {
         printf("Failed to load config file %s\n", config_filename);
-        return map;
+        return -1;
     }
 
-    unsigned int err = loadbmp_decode_file(image_filename, &map.image, &map.width, &map.height, LOADBMP_RGBA);
+    unsigned int err = loadbmp_decode_file(image_filename, &map->image, (unsigned int *)&map->width, (unsigned int *)&map->height, LOADBMP_RGBA);
     if (err)
 		printf("LoadBMP Load Error: %u\n", err);
     
     FILE *fp;
     fp = fopen(config_filename, "r");
-    fscanf(fp, "%*[^\n]\n");
-    fscanf(fp, "%f, %f, %f, %f\n", &map.top_left_lat, &map.top_left_lon, &map.bottom_right_lat, &map.bottom_right_lon);
+    if (fscanf(fp, "%*[^\n]\n") == EOF) {
+        fprintf(stderr, "Файл пуст или ошибка при пропуске заголовка\n");
+        return -1; // TODO: Подобрать подходящую ошибку.
+    }
+
+    int count = fscanf(fp, "%f, %f, %f, %f\n", &map->top_left_lat, &map->top_left_lon, &map->bottom_right_lat, &map->bottom_right_lon);
+    if(4 == count) {
+        return -1;
+    }
     fclose(fp);
 
-    return map;
+    return 0;
 }
 
 
@@ -86,38 +95,52 @@ void draw_point_by_lat_lon(peace_of_map_t * map, float lat, float lon, int r, in
 }
 
 
-stations_list_t load_stations(const char * stations_list_filename) {
-    stations_list_t stations_list;
-    stations_list.num_stations = 0;
+ssize_t load_stations(const char * stations_list_filename, stations_list_t * stations_list) {
+    if(!stations_list) return -EINVAL;
+    stations_list->num_stations = 0;
 
     // Count entries
     FILE *fp; 
     fp = fopen(stations_list_filename, "r");
-    fscanf(fp, "%*[^\n]\n");
-    while(!feof(fp))
-    {
-        fscanf(fp, "%*[^\n]\n");
-        stations_list.num_stations++;
+    if (fscanf(fp, "%*[^\n]\n") == EOF) {
+        fprintf(stderr, "Файл пуст или ошибка при пропуске заголовка\n");
+        return -1; // TODO: Подобрать подходящую ошибку.
+    }
+    while (fscanf(fp, "%*[^\n]\n") != EOF) {
+        stations_list->num_stations++;
     }
     fclose(fp);
-    stations_list.num_stations = stations_list.num_stations;
+    stations_list->num_stations = stations_list->num_stations;
 
     // Read stations
-    stations_list.stations = malloc(stations_list.num_stations * sizeof(station_t));
+    stations_list->stations = malloc(stations_list->num_stations * sizeof(station_t));
     fp = fopen(stations_list_filename, "r");
-    fscanf(fp, "%*[^\n]\n");    
-    for (int i = 0; i < stations_list.num_stations; i++)
+
+    if (fscanf(fp, "%*[^\n]\n") == EOF) {
+        fprintf(stderr, "Файл пуст или ошибка при пропуске заголовка\n");
+        return -1; // TODO: Подобрать подходящую ошибку.
+    }
+    for (int i = 0; i < stations_list->num_stations; i++)
     {
         char line[256];
-        fgets(line, 256, fp);
-        sscanf(line, "%d,%s,%f,%f", &stations_list.stations[i].id,
-                                    stations_list.stations[i].name,
-                                    &stations_list.stations[i].lat,
-                                    &stations_list.stations[i].lon);
+        if (fgets(line, sizeof(line), fp) == NULL) {
+            fprintf(stderr, "Error read station №%d\n", i);
+            return -1; // TODO: Подобрать подходящую ошибку.
+        }
+
+        int n = sscanf(line, "%d,%[^''\t,],%12f,%12f",
+                    &stations_list->stations[i].id,
+                    stations_list->stations[i].name,
+                    &stations_list->stations[i].lat,
+                    &stations_list->stations[i].lon);
+        if (n != 4) {
+            fprintf(stderr, "Некорректный формат строки: %s\n", line);
+            return -1; // TODO: Подобрать подходящую ошибку.
+        }
     }
     fclose(fp);
 
-    return stations_list;
+    return 0;
 }
 
 

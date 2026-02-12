@@ -1,4 +1,6 @@
+# тут надо было по другому сделать, но для тестового сойдет
 lib/build/example
 lib/build/libstationmapper.so
 lib/build/stationmapper.o
 lib/map_out.bmp
+lib/build/stationmapper.d
